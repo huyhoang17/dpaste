@@ -10,10 +10,13 @@ from .highlight import LEXER_DEFAULT
 R = SystemRandom()
 ONETIME_LIMIT = getattr(settings, 'DPASTE_ONETIME_LIMIT', 2)
 
+
 def generate_secret_id(length=None, alphabet=None, tries=0):
     length = length or getattr(settings, 'DPASTE_SLUG_LENGTH', 4)
-    alphabet = alphabet or getattr(settings, 'DPASTE_SLUG_CHOICES',
-        'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ1234567890')
+    alphabet = alphabet or getattr(
+        settings, 'DPASTE_SLUG_CHOICES',
+        'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ1234567890'
+    )
     secret_id = ''.join([R.choice(alphabet) for i in range(length)])
 
     # Check if this slug already exists, if not, return this new slug
@@ -24,7 +27,8 @@ def generate_secret_id(length=None, alphabet=None, tries=0):
 
     # Otherwise create a new slug which is +1 character longer than the
     # regular one.
-    return generate_secret_id(length=length+1, tries=tries)
+    return generate_secret_id(length=length + 1, tries=tries)
+
 
 class Snippet(models.Model):
     EXPIRE_TIME = 1
@@ -37,15 +41,16 @@ class Snippet(models.Model):
     )
 
     secret_id = models.CharField(_(u'Secret ID'), max_length=255, blank=True, null=True,
-        unique=True)
+                                 unique=True)
     content = models.TextField(_(u'Content'))
     lexer = models.CharField(_(u'Lexer'), max_length=30, default=LEXER_DEFAULT)
     published = models.DateTimeField(_(u'Published'), auto_now_add=True)
     expire_type = models.PositiveSmallIntegerField(_(u'Expire Type'),
-        choices=EXPIRE_CHOICES, default=EXPIRE_CHOICES[0][0])
+                                                   choices=EXPIRE_CHOICES, default=EXPIRE_CHOICES[0][0])
     expires = models.DateTimeField(_(u'Expires'), blank=True, null=True)
     view_count = models.PositiveIntegerField(_('View count'), default=0)
-    parent = models.ForeignKey('self', null=True, blank=True, related_name='children')
+    parent = models.ForeignKey(
+        'self', null=True, blank=True, related_name='children')
 
     class Meta:
         ordering = ('-published',)

@@ -1,13 +1,15 @@
 # Import global settings to make it easier to extend settings.
-from django.conf.global_settings import *
+# from django.conf.global_settings import *
 
 
-#==============================================================================
+# =============================================================================
 # Calculation of directories relative to the module location
-#==============================================================================
+# =============================================================================
 import os
 import sys
+import string
 import dpaste
+import random
 
 PROJECT_DIR, PROJECT_MODULE_NAME = os.path.split(
     os.path.dirname(os.path.realpath(dpaste.__file__))
@@ -20,11 +22,16 @@ VAR_ROOT = os.path.join(os.path.dirname(PYTHON_BIN), 'var')
 if not os.path.exists(VAR_ROOT):
     os.mkdir(VAR_ROOT)
 
-#==============================================================================
-# Generic Django project settings
-#==============================================================================
+ADMINS = (
+    ('phanhoang17', 'hoangphan0710@gmail.com'),
+)
+MANAGERS = ADMINS
 
-DEBUG = False
+# =============================================================================
+# Generic Django project settings
+# =============================================================================
+
+DEBUG = True
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -32,7 +39,7 @@ TIME_ZONE = 'UTC'
 SITE_ID = 1
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = ''
+# SECRET_KEY = ''
 
 ALLOWED_HOSTS = (
     'dpaste.de',
@@ -42,11 +49,14 @@ ALLOWED_HOSTS = (
     '127.0.0.1',
 )
 
-SECRET_KEY = 'CHANGE_ME'
+# changed
+SECRET_KEY = ''.join([random.SystemRandom().choice("{}{}{}".format(
+    string.ascii_letters, string.digits, string.punctuation))
+    for i in range(50)])
 
-#==============================================================================
+# =============================================================================
 # I18N
-#==============================================================================
+# =============================================================================
 
 USE_I18N = True
 USE_L10N = False
@@ -63,15 +73,15 @@ LOCALE_PATHS = (
     os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'locale')),
 )
 
-#==============================================================================
+# =============================================================================
 # Static files
-#==============================================================================
+# =============================================================================
 
 STATIC_ROOT = os.path.join(VAR_ROOT, 'static')
 
-#==============================================================================
+# =============================================================================
 # Project URLS and media settings
-#==============================================================================
+# =============================================================================
 
 STATIC_URL = '/static/'
 ADMIN_MEDIA_PREFIX = '/static/admin/'
@@ -82,16 +92,21 @@ LOGIN_URL = '/accounts/login/'
 LOGOUT_URL = '/accounts/logout/'
 LOGIN_REDIRECT_URL = '/'
 
-#==============================================================================
+# =============================================================================
 # Templates
-#==============================================================================
+# =============================================================================
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    # show admin page
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # change content of field
+    'django.contrib.messages.middleware.MessageMiddleware',
 )
 
 
@@ -104,6 +119,8 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.i18n',
                 'dpaste.context_processors.dpaste_globals',
             ],
@@ -111,12 +128,25 @@ TEMPLATES = [
     },
 ]
 
-INSTALLED_APPS = (
-    'django.contrib.staticfiles',
+# INSTALLED_APPS = (
+#     'django.contrib.staticfiles',
+#     'django.contrib.sessions',
+#     'gunicorn',
+#     'dpaste',
+# )
+
+# changed
+INSTALLED_APPS = [
+    'django.contrib.sites',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
     'gunicorn',
     'dpaste',
-)
+]
 
 DATABASES = {
     'default': {
@@ -127,9 +157,18 @@ DATABASES = {
     }
 }
 
-#==============================================================================
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'dpaste',
+#         'USER': '',
+#         'PASSWORD': '',
+#     }
+# }
+
+# =============================================================================
 # App specific settings
-#==============================================================================
+# =============================================================================
 
 # How many recent snippets to save for every user? IDs of this snippets are
 # stored in the user session.
@@ -158,3 +197,5 @@ LOGGING = {
         },
     }
 }
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
